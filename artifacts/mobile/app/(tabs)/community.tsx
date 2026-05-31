@@ -180,7 +180,7 @@ export default function CommunityScreen() {
           }
         />
 
-        <View style={[styles.inputContainer, { paddingBottom: Platform.OS === "ios" ? 0 : insets.bottom + 8 }]}>
+        <View style={[styles.inputContainer, { paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 8 }]}>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.textInput}
