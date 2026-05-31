@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: ai
+    description: AI HTML generation
+  - name: chat
+    description: Community chat
 paths:
   /healthz:
     get:
@@ -24,6 +28,69 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /ai/generate:
+    post:
+      operationId: generateHtml
+      tags: [ai]
+      summary: Generate HTML from prompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateHtmlInput"
+      responses:
+        "200":
+          description: Generated HTML
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateHtmlResult"
+  /chat/messages:
+    get:
+      operationId: getChatMessages
+      tags: [chat]
+      summary: Get chat messages
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+    post:
+      operationId: postChatMessage
+      tags: [chat]
+      summary: Post a chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "201":
+          description: Created message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+  /chat/online:
+    get:
+      operationId: getOnlineUsers
+      tags: [chat]
+      summary: Get online users
+      responses:
+        "200":
+          description: List of online users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OnlineUser"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +100,66 @@ components:
           type: string
       required:
         - status
-
+    GenerateHtmlInput:
+      type: object
+      properties:
+        prompt:
+          type: string
+        username:
+          type: string
+      required:
+        - prompt
+    GenerateHtmlResult:
+      type: object
+      properties:
+        html:
+          type: string
+        title:
+          type: string
+      required:
+        - html
+        - title
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        text:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        initials:
+          type: string
+      required:
+        - id
+        - username
+        - text
+        - timestamp
+        - initials
+    ChatMessageInput:
+      type: object
+      properties:
+        username:
+          type: string
+        text:
+          type: string
+      required:
+        - username
+        - text
+    OnlineUser:
+      type: object
+      properties:
+        username:
+          type: string
+        initials:
+          type: string
+        lastSeen:
+          type: string
+          format: date-time
+      required:
+        - username
+        - initials
+        - lastSeen
