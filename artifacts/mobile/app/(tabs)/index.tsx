@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
@@ -16,50 +15,53 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColors } from "@/hooks/useColors";
 
-const QUICK_CARDS = [
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning,";
+  if (h < 17) return "Good afternoon,";
+  return "Good evening,";
+}
+
+const QUICK_ROWS = [
   {
     icon: "cpu" as const,
     label: "AI Generator",
-    desc: "Generate HTML with AI",
+    desc: "Generate HTML with Kimi AI",
     route: "/(tabs)/ai" as const,
-    gradient: ["#6D28D9", "#4C1D95"] as [string, string],
+    iconBg: ["#6D28D9", "#4C1D95"] as [string, string],
+    iconColor: "#A78BFA",
   },
   {
     icon: "upload-cloud" as const,
     label: "Upload HTML",
-    desc: "Upload & preview code",
+    desc: "Host and share your files",
     route: "/(tabs)/upload" as const,
-    gradient: ["#0EA5E9", "#0369A1"] as [string, string],
+    iconBg: ["#0E7490", "#0369A1"] as [string, string],
+    iconColor: "#38BDF8",
   },
   {
     icon: "message-circle" as const,
     label: "Community",
-    desc: "Chat with creators",
+    desc: "Chat with other builders",
     route: "/(tabs)/community" as const,
-    gradient: ["#10B981", "#047857"] as [string, string],
+    iconBg: ["#065F46", "#047857"] as [string, string],
+    iconColor: "#34D399",
   },
   {
     icon: "user" as const,
-    label: "My Profile",
-    desc: "View your uploads",
+    label: "Profile",
+    desc: "Your account and history",
     route: "/(tabs)/profile" as const,
-    gradient: ["#F59E0B", "#B45309"] as [string, string],
+    iconBg: ["#92400E", "#B45309"] as [string, string],
+    iconColor: "#FCD34D",
   },
-];
-
-const TIPS = [
-  "Try: 'make a landing page for a bakery'",
-  "Try: 'create a portfolio for a developer'",
-  "Try: 'build an e-commerce store page'",
-  "Try: 'design a fitness studio website'",
 ];
 
 export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-
-  const firstName = user?.username?.split(" ")[0] ?? "there";
+  const username = user?.username ?? "there";
   const styles = makeStyles(colors);
 
   return (
@@ -67,103 +69,68 @@ export default function HomeScreen() {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingTop: Platform.OS === "web" ? insets.top + 67 : insets.top + 16,
-          paddingBottom: insets.bottom + 100,
-          paddingHorizontal: 20,
+          paddingTop: Platform.OS === "web" ? insets.top + 67 : insets.top + 20,
+          paddingBottom: insets.bottom + 110,
+          paddingHorizontal: 18,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInUp.delay(50).springify()} style={styles.headerRow}>
-          <View>
-            <Text style={styles.greeting}>Hello, {firstName} 👋</Text>
-            <View style={styles.statusRow}>
+        {/* Header greeting card */}
+        <Animated.View entering={FadeInUp.delay(50).springify()} style={styles.greetCard}>
+          <View style={styles.greetTop}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.greetLabel}>{getGreeting()}</Text>
+              <Text style={styles.greetName}>{username}</Text>
+            </View>
+            <View style={styles.onlinePill}>
               <View style={styles.onlineDot} />
-              <Text style={styles.onlineLabel}>Online</Text>
+              <Text style={styles.onlineText}>Online</Text>
             </View>
           </View>
-          <Pressable
-            onPress={() => router.push("/(tabs)/profile")}
-            style={({ pressed }) => [styles.avatarBtn, pressed && { opacity: 0.75 }]}
-          >
-            <LinearGradient colors={[colors.primary, colors.accent]} style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {user?.username
-                  ?.split(" ")
-                  .map((w) => w[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2) ?? "?"}
-              </Text>
-            </LinearGradient>
-          </Pressable>
-        </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(100).springify()}>
-          <LinearGradient
-            colors={[colors.gradientStart, colors.gradientEnd]}
-            style={styles.heroBanner}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <View style={styles.heroBadge}>
-              <Feather name="zap" size={12} color="#F59E0B" />
-              <Text style={styles.heroBadgeText}>AI Powered</Text>
+          <View style={styles.tagRow}>
+            <View style={styles.tag}>
+              <Feather name="code" size={11} color={colors.primary} />
+              <Text style={styles.tagText}>HTML Creator</Text>
             </View>
-            <Text style={styles.heroTitle}>Create HTML{"\n"}in seconds</Text>
-            <Text style={styles.heroSub}>Describe your idea, get production-ready HTML instantly</Text>
-            <Pressable
-              style={({ pressed }) => [styles.heroBtn, pressed && { opacity: 0.85 }]}
-              onPress={() => {
-                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/(tabs)/ai");
-              }}
-            >
-              <Text style={styles.heroBtnText}>Try AI Generator</Text>
-              <Feather name="arrow-right" size={16} color={colors.primary} />
-            </Pressable>
-          </LinearGradient>
+            <View style={styles.tag}>
+              <Feather name="zap" size={11} color={colors.primary} />
+              <Text style={styles.tagText}>Kimi AI</Text>
+            </View>
+          </View>
+
+          <Text style={styles.greetDesc}>
+            Generate, upload, and share HTML code powered by AI.
+          </Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(150).springify()}>
+        {/* Quick Access */}
+        <Animated.View entering={FadeInDown.delay(120).springify()}>
           <Text style={styles.sectionTitle}>Quick Access</Text>
-          <View style={styles.cardsGrid}>
-            {QUICK_CARDS.map((card, i) => (
-              <Animated.View key={card.label} entering={FadeInDown.delay(180 + i * 60).springify()}>
+          <View style={styles.listCard}>
+            {QUICK_ROWS.map((row, i) => (
+              <Animated.View key={row.label} entering={FadeInDown.delay(140 + i * 55).springify()}>
                 <Pressable
-                  style={({ pressed }) => [styles.card, pressed && { opacity: 0.85, transform: [{ scale: 0.97 }] }]}
+                  style={({ pressed }) => [
+                    styles.listRow,
+                    i < QUICK_ROWS.length - 1 && styles.listRowBorder,
+                    pressed && { opacity: 0.75 },
+                  ]}
                   onPress={() => {
                     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push(card.route);
+                    router.push(row.route);
                   }}
                 >
-                  <LinearGradient colors={card.gradient} style={styles.cardIconBg}>
-                    <Feather name={card.icon} size={22} color="white" />
-                  </LinearGradient>
-                  <Text style={styles.cardLabel}>{card.label}</Text>
-                  <Text style={styles.cardDesc}>{card.desc}</Text>
+                  <View style={[styles.rowIconWrap, { backgroundColor: row.iconBg[1] + "33" }]}>
+                    <Feather name={row.icon} size={20} color={row.iconColor} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.rowLabel}>{row.label}</Text>
+                    <Text style={styles.rowDesc}>{row.desc}</Text>
+                  </View>
+                  <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
                 </Pressable>
               </Animated.View>
-            ))}
-          </View>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(400).springify()}>
-          <Text style={styles.sectionTitle}>Get Started</Text>
-          <View style={styles.tipsCard}>
-            {TIPS.map((tip, i) => (
-              <Pressable
-                key={i}
-                style={({ pressed }) => [styles.tipRow, pressed && { opacity: 0.7 }]}
-                onPress={() => {
-                  if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push("/(tabs)/ai");
-                }}
-              >
-                <View style={styles.tipBullet}>
-                  <Feather name="chevron-right" size={14} color={colors.primary} />
-                </View>
-                <Text style={styles.tipText}>{tip}</Text>
-              </Pressable>
             ))}
           </View>
         </Animated.View>
@@ -174,52 +141,123 @@ export default function HomeScreen() {
 
 function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useColors>) {
   return StyleSheet.create({
-    headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-    greeting: { fontSize: 22, fontWeight: "800" as const, color: colors.foreground, letterSpacing: -0.5 },
-    statusRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 },
-    onlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#10B981" },
-    onlineLabel: { fontSize: 13, color: "#10B981", fontFamily: "Inter_500Medium" },
-    avatarBtn: {},
-    avatar: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
-    avatarText: { color: "white", fontSize: 16, fontWeight: "700" as const },
-    heroBanner: {
-      borderRadius: colors.radius, padding: 24, marginBottom: 28,
+    greetCard: {
+      backgroundColor: colors.card,
+      borderRadius: colors.radius,
+      padding: 20,
+      marginBottom: 28,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
-    heroBadge: {
-      flexDirection: "row", alignItems: "center", gap: 4,
-      backgroundColor: "rgba(255,255,255,0.15)", paddingHorizontal: 10, paddingVertical: 4,
-      borderRadius: 20, alignSelf: "flex-start", marginBottom: 12,
+    greetTop: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginBottom: 14,
     },
-    heroBadgeText: { fontSize: 11, color: "#FDE68A", fontFamily: "Inter_600SemiBold" },
-    heroTitle: { fontSize: 28, fontWeight: "800" as const, color: "white", letterSpacing: -0.5, marginBottom: 8 },
-    heroSub: { fontSize: 14, color: "rgba(255,255,255,0.75)", marginBottom: 20, lineHeight: 20 },
-    heroBtn: {
-      flexDirection: "row", alignItems: "center", gap: 8,
-      backgroundColor: "white", paddingHorizontal: 20, paddingVertical: 12,
-      borderRadius: 50, alignSelf: "flex-start",
+    greetLabel: {
+      fontSize: 14,
+      color: colors.mutedForeground,
+      fontFamily: "Inter_400Regular",
     },
-    heroBtnText: { color: colors.primary, fontWeight: "700" as const, fontSize: 14 },
-    sectionTitle: { fontSize: 17, fontWeight: "700" as const, color: colors.foreground, marginBottom: 14, letterSpacing: -0.3 },
-    cardsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 28 },
-    card: {
-      width: "47%", backgroundColor: colors.card,
-      borderRadius: colors.radius, padding: 18,
-      borderWidth: 1, borderColor: colors.border,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    greetName: {
+      fontSize: 26,
+      fontWeight: "800" as const,
+      color: colors.foreground,
+      letterSpacing: -0.5,
+      marginTop: 2,
     },
-    cardIconBg: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", marginBottom: 12 },
-    cardLabel: { fontSize: 14, fontWeight: "700" as const, color: colors.foreground, marginBottom: 4 },
-    cardDesc: { fontSize: 12, color: colors.mutedForeground, lineHeight: 16 },
-    tipsCard: {
-      backgroundColor: colors.card, borderRadius: colors.radius, padding: 4,
-      borderWidth: 1, borderColor: colors.border,
+    onlinePill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: "rgba(34,197,94,0.12)",
+      borderWidth: 1,
+      borderColor: "rgba(34,197,94,0.25)",
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 20,
+      marginTop: 4,
     },
-    tipRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 10 },
-    tipBullet: {
-      width: 24, height: 24, borderRadius: 8, backgroundColor: colors.secondary,
-      alignItems: "center", justifyContent: "center",
+    onlineDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.success,
     },
-    tipText: { fontSize: 13, color: colors.mutedForeground, flex: 1, fontFamily: "Inter_400Regular" },
+    onlineText: {
+      fontSize: 12,
+      color: colors.success,
+      fontFamily: "Inter_600SemiBold",
+    },
+    tagRow: {
+      flexDirection: "row",
+      gap: 8,
+      marginBottom: 14,
+    },
+    tag: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      borderWidth: 1,
+      borderColor: colors.primary + "55",
+      backgroundColor: colors.primary + "18",
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 20,
+    },
+    tagText: {
+      fontSize: 12,
+      color: colors.primary,
+      fontFamily: "Inter_600SemiBold",
+    },
+    greetDesc: {
+      fontSize: 14,
+      color: colors.mutedForeground,
+      lineHeight: 21,
+      fontFamily: "Inter_400Regular",
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "700" as const,
+      color: colors.foreground,
+      marginBottom: 14,
+      letterSpacing: -0.3,
+    },
+    listCard: {
+      backgroundColor: colors.card,
+      borderRadius: colors.radius,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: "hidden",
+    },
+    listRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 17,
+    },
+    listRowBorder: {
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    rowIconWrap: {
+      width: 46,
+      height: 46,
+      borderRadius: 13,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    rowLabel: {
+      fontSize: 15,
+      fontWeight: "700" as const,
+      color: colors.foreground,
+      marginBottom: 3,
+    },
+    rowDesc: {
+      fontSize: 13,
+      color: colors.mutedForeground,
+      fontFamily: "Inter_400Regular",
+    },
   });
 }

@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -31,10 +30,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     setError("");
-    if (!email.trim() || !password) {
-      setError("Please fill in all fields");
-      return;
-    }
+    if (!email.trim() || !password) { setError("Please fill in all fields"); return; }
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     const result = await login(email.trim(), password);
@@ -48,34 +44,31 @@ export default function LoginScreen() {
   const styles = makeStyles(colors);
 
   return (
-    <LinearGradient
-      colors={[colors.gradientStart, colors.gradientEnd, "#1E1B4B"]}
-      style={{ flex: 1 }}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <KeyboardAwareScrollViewCompat
         contentContainerStyle={[
           styles.container,
-          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 },
+          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 32 },
         ]}
         bottomOffset={24}
       >
-        <Animated.View entering={FadeInUp.delay(100).springify()} style={styles.header}>
+        {/* Logo */}
+        <Animated.View entering={FadeInUp.delay(80).springify()} style={styles.logoArea}>
           <View style={styles.iconBadge}>
-            <Feather name="code" size={32} color="white" />
+            <Feather name="code" size={30} color={colors.primary} />
           </View>
           <Text style={styles.appName}>HTML Creator</Text>
           <Text style={styles.tagline}>Build stunning web pages with AI</Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.card}>
+        {/* Card */}
+        <Animated.View entering={FadeInDown.delay(180).springify()} style={styles.card}>
           <Text style={styles.cardTitle}>Welcome back</Text>
           <Text style={styles.cardSub}>Sign in to your account</Text>
 
           {!!error && (
             <View style={styles.errorBox}>
-              <Feather name="alert-circle" size={16} color="#EF4444" />
+              <Feather name="alert-circle" size={15} color="#EF4444" />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
@@ -83,7 +76,7 @@ export default function LoginScreen() {
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputWrap}>
-              <Feather name="mail" size={18} color={colors.mutedForeground} style={styles.inputIcon} />
+              <Feather name="mail" size={17} color={colors.mutedForeground} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
@@ -100,7 +93,7 @@ export default function LoginScreen() {
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Password</Text>
             <View style={styles.inputWrap}>
-              <Feather name="lock" size={18} color={colors.mutedForeground} style={styles.inputIcon} />
+              <Feather name="lock" size={17} color={colors.mutedForeground} style={styles.inputIcon} />
               <TextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="••••••••"
@@ -111,7 +104,7 @@ export default function LoginScreen() {
                 autoComplete="password"
               />
               <Pressable onPress={() => setShowPassword((v) => !v)} style={styles.eyeBtn}>
-                <Feather name={showPassword ? "eye-off" : "eye"} size={18} color={colors.mutedForeground} />
+                <Feather name={showPassword ? "eye-off" : "eye"} size={17} color={colors.mutedForeground} />
               </Pressable>
             </View>
           </View>
@@ -121,24 +114,16 @@ export default function LoginScreen() {
             onPress={handleLogin}
             disabled={loading}
           >
-            <LinearGradient
-              colors={[colors.primary, colors.accent]}
-              style={styles.loginBtnGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
+            <View style={styles.loginBtnInner}>
               {loading ? (
                 <ActivityIndicator color="white" />
               ) : (
                 <Text style={styles.loginBtnText}>Sign In</Text>
               )}
-            </LinearGradient>
+            </View>
           </Pressable>
 
-          <Pressable
-            style={styles.registerLink}
-            onPress={() => router.push("/(auth)/register")}
-          >
+          <Pressable style={styles.registerLink} onPress={() => router.push("/(auth)/register")}>
             <Text style={styles.registerLinkText}>
               Don't have an account?{" "}
               <Text style={{ color: colors.primary, fontWeight: "700" }}>Create one</Text>
@@ -146,36 +131,34 @@ export default function LoginScreen() {
           </Pressable>
         </Animated.View>
       </KeyboardAwareScrollViewCompat>
-    </LinearGradient>
+    </View>
   );
 }
 
 function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useColors>) {
   return StyleSheet.create({
-    container: { paddingHorizontal: 24, alignItems: "center" },
-    header: { alignItems: "center", marginBottom: 32 },
+    container: { paddingHorizontal: 22, alignItems: "center" },
+    logoArea: { alignItems: "center", marginBottom: 36 },
     iconBadge: {
-      width: 72, height: 72, borderRadius: 20,
-      backgroundColor: "rgba(255,255,255,0.15)",
-      alignItems: "center", justifyContent: "center",
-      marginBottom: 16,
-      borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
+      width: 76, height: 76, borderRadius: 22,
+      backgroundColor: colors.primary + "18",
+      borderWidth: 1.5, borderColor: colors.primary + "35",
+      alignItems: "center", justifyContent: "center", marginBottom: 18,
     },
-    appName: { fontSize: 28, fontWeight: "800" as const, color: "white", letterSpacing: -0.5 },
-    tagline: { fontSize: 15, color: "rgba(255,255,255,0.7)", marginTop: 6 },
+    appName: { fontSize: 28, fontWeight: "800" as const, color: colors.foreground, letterSpacing: -0.5 },
+    tagline: { fontSize: 14, color: colors.mutedForeground, marginTop: 6, fontFamily: "Inter_400Regular" },
     card: {
       width: "100%", backgroundColor: colors.card,
-      borderRadius: colors.radius, padding: 28,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.15, shadowRadius: 24, elevation: 8,
+      borderRadius: colors.radius, padding: 26,
+      borderWidth: 1, borderColor: colors.border,
     },
     cardTitle: { fontSize: 22, fontWeight: "700" as const, color: colors.foreground, marginBottom: 4 },
-    cardSub: { fontSize: 14, color: colors.mutedForeground, marginBottom: 24 },
+    cardSub: { fontSize: 14, color: colors.mutedForeground, marginBottom: 22, fontFamily: "Inter_400Regular" },
     errorBox: {
       flexDirection: "row", alignItems: "center", gap: 8,
-      backgroundColor: "#FEF2F2", borderRadius: 10,
+      backgroundColor: "#EF444415", borderRadius: 10,
       padding: 12, marginBottom: 16,
-      borderWidth: 1, borderColor: "#FECACA",
+      borderWidth: 1, borderColor: "#EF444430",
     },
     errorText: { color: "#EF4444", fontSize: 13, flex: 1 },
     fieldGroup: { marginBottom: 16 },
@@ -187,15 +170,14 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
       paddingHorizontal: 14,
     },
     inputIcon: { marginRight: 10 },
-    input: {
-      flex: 1, height: 48, fontSize: 15,
-      color: colors.foreground,
-      fontFamily: "Inter_400Regular",
-    },
+    input: { flex: 1, height: 48, fontSize: 15, color: colors.foreground, fontFamily: "Inter_400Regular" },
     eyeBtn: { padding: 6 },
     loginBtn: { marginTop: 8, borderRadius: 12, overflow: "hidden" },
-    loginBtnGradient: { height: 52, alignItems: "center", justifyContent: "center" },
-    loginBtnText: { color: "white", fontSize: 16, fontWeight: "700" as const, letterSpacing: 0.3 },
+    loginBtnInner: {
+      height: 52, backgroundColor: colors.primary,
+      alignItems: "center", justifyContent: "center", borderRadius: 12,
+    },
+    loginBtnText: { color: "white", fontSize: 16, fontWeight: "700" as const, letterSpacing: 0.2 },
     registerLink: { marginTop: 20, alignItems: "center" },
     registerLinkText: { fontSize: 14, color: colors.mutedForeground },
   });

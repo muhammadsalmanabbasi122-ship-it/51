@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import React, { useRef, useState } from "react";
@@ -45,25 +44,16 @@ export default function AIScreen() {
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
-
   const styles = makeStyles(colors);
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
-
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      text: trimmed,
-      timestamp: new Date(),
-    };
-
+    const userMsg: Message = { id: Date.now().toString(), role: "user", text: trimmed, timestamp: new Date() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
     try {
       const domain = process.env.EXPO_PUBLIC_DOMAIN;
       const baseUrl = domain ? `https://${domain}` : "";
@@ -76,20 +66,17 @@ export default function AIScreen() {
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        text: `Here's your **${data.title}** HTML! Tap the copy button to use it.`,
+        text: `Here's your **${data.title}** HTML! Tap copy to use it.`,
         html: data.html,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMsg]);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      const errMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        text: "Sorry, something went wrong. Please try again.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errMsg]);
+      setMessages((prev) => [
+        ...prev,
+        { id: (Date.now() + 1).toString(), role: "assistant", text: "Something went wrong. Please try again.", timestamp: new Date() },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -107,9 +94,9 @@ export default function AIScreen() {
     return (
       <Animated.View entering={FadeInDown.duration(300)} style={[styles.msgRow, isUser && styles.msgRowUser]}>
         {!isUser && (
-          <LinearGradient colors={[colors.primary, colors.accent]} style={styles.botAvatar}>
-            <Feather name="cpu" size={14} color="white" />
-          </LinearGradient>
+          <View style={styles.botAvatar}>
+            <Feather name="cpu" size={14} color={colors.primary} />
+          </View>
         )}
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleBot]}>
           <Text style={[styles.bubbleText, isUser && styles.bubbleTextUser]}>{item.text}</Text>
@@ -120,7 +107,7 @@ export default function AIScreen() {
             >
               <Feather
                 name={copiedId === item.id ? "check" : "copy"}
-                size={14}
+                size={13}
                 color={copiedId === item.id ? colors.success : colors.primary}
               />
               <Text style={[styles.copyBtnText, copiedId === item.id && { color: colors.success }]}>
@@ -130,11 +117,11 @@ export default function AIScreen() {
           )}
         </View>
         {isUser && (
-          <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.userAvatar}>
+          <View style={styles.userAvatar}>
             <Text style={styles.userAvatarText}>
               {user?.username?.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2) ?? "U"}
             </Text>
-          </LinearGradient>
+          </View>
         )}
       </Animated.View>
     );
@@ -142,38 +129,29 @@ export default function AIScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={[
-          styles.header,
-          { paddingTop: Platform.OS === "web" ? insets.top + 67 : insets.top + 16 },
-        ]}
-      >
-        <LinearGradient colors={[colors.primary, colors.accent]} style={styles.headerIcon}>
-          <Feather name="cpu" size={18} color="white" />
-        </LinearGradient>
+      <View style={[styles.header, { paddingTop: Platform.OS === "web" ? insets.top + 67 : insets.top + 16 }]}>
+        <View style={styles.headerIconWrap}>
+          <Feather name="cpu" size={18} color={colors.primary} />
+        </View>
         <View>
           <Text style={styles.headerTitle}>AI Generator</Text>
           <Text style={styles.headerSub}>Describe any web page</Text>
         </View>
       </View>
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior="padding"
-        keyboardVerticalOffset={0}
-      >
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={0}>
         {messages.length === 0 ? (
           <View style={styles.emptyState}>
-            <LinearGradient colors={[colors.primary, colors.accent]} style={styles.emptyIcon}>
-              <Feather name="code" size={32} color="white" />
-            </LinearGradient>
+            <View style={styles.emptyIcon}>
+              <Feather name="code" size={30} color={colors.primary} />
+            </View>
             <Text style={styles.emptyTitle}>Start with a prompt</Text>
             <Text style={styles.emptySub}>Describe any website and get HTML instantly</Text>
             <View style={styles.suggestionsGrid}>
               {SUGGESTIONS.map((s) => (
                 <Pressable
                   key={s}
-                  style={({ pressed }) => [styles.suggestion, pressed && { opacity: 0.75 }]}
+                  style={({ pressed }) => [styles.suggestion, pressed && { opacity: 0.7 }]}
                   onPress={() => sendMessage(s)}
                 >
                   <Text style={styles.suggestionText}>{s}</Text>
@@ -187,20 +165,16 @@ export default function AIScreen() {
             data={messages}
             keyExtractor={(m) => m.id}
             renderItem={renderMessage}
-            contentContainerStyle={{
-              paddingHorizontal: 16,
-              paddingVertical: 16,
-              paddingBottom: insets.bottom + 110,
-            }}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16, paddingBottom: insets.bottom + 110 }}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             ListFooterComponent={
               loading ? (
                 <View style={styles.typingRow}>
-                  <LinearGradient colors={[colors.primary, colors.accent]} style={styles.botAvatar}>
-                    <Feather name="cpu" size={14} color="white" />
-                  </LinearGradient>
+                  <View style={styles.botAvatar}>
+                    <Feather name="cpu" size={14} color={colors.primary} />
+                  </View>
                   <View style={styles.typingBubble}>
                     <ActivityIndicator size="small" color={colors.primary} />
                     <Text style={styles.typingText}>Generating HTML...</Text>
@@ -211,12 +185,7 @@ export default function AIScreen() {
           />
         )}
 
-        <View
-          style={[
-            styles.inputContainer,
-            { paddingBottom: Platform.OS === "ios" ? 0 : insets.bottom + 8 },
-          ]}
-        >
+        <View style={[styles.inputContainer, { paddingBottom: Platform.OS === "ios" ? 0 : insets.bottom + 8 }]}>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.textInput}
@@ -238,20 +207,9 @@ export default function AIScreen() {
               onPress={() => sendMessage(input)}
               disabled={!input.trim() || loading}
             >
-              <LinearGradient
-                colors={
-                  input.trim() && !loading
-                    ? [colors.primary, colors.accent]
-                    : [colors.muted, colors.muted]
-                }
-                style={styles.sendBtnGradient}
-              >
-                <Feather
-                  name="send"
-                  size={18}
-                  color={input.trim() && !loading ? "white" : colors.mutedForeground}
-                />
-              </LinearGradient>
+              <View style={[styles.sendBtnInner, input.trim() && !loading ? styles.sendBtnActive : styles.sendBtnInactive]}>
+                <Feather name="send" size={18} color={input.trim() && !loading ? "white" : colors.mutedForeground} />
+              </View>
             </Pressable>
           </View>
         </View>
@@ -268,11 +226,21 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
       borderBottomWidth: 1, borderBottomColor: colors.border,
       backgroundColor: colors.background,
     },
-    headerIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+    headerIconWrap: {
+      width: 40, height: 40, borderRadius: 12,
+      backgroundColor: colors.primary + "20",
+      alignItems: "center", justifyContent: "center",
+      borderWidth: 1, borderColor: colors.primary + "35",
+    },
     headerTitle: { fontSize: 17, fontWeight: "700" as const, color: colors.foreground },
     headerSub: { fontSize: 12, color: colors.mutedForeground, marginTop: 1 },
     emptyState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, paddingBottom: 80 },
-    emptyIcon: { width: 72, height: 72, borderRadius: 20, alignItems: "center", justifyContent: "center", marginBottom: 16 },
+    emptyIcon: {
+      width: 72, height: 72, borderRadius: 20,
+      backgroundColor: colors.primary + "18",
+      borderWidth: 1, borderColor: colors.primary + "30",
+      alignItems: "center", justifyContent: "center", marginBottom: 16,
+    },
     emptyTitle: { fontSize: 20, fontWeight: "700" as const, color: colors.foreground, marginBottom: 8 },
     emptySub: { fontSize: 14, color: colors.mutedForeground, textAlign: "center", marginBottom: 28, lineHeight: 20 },
     suggestionsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center" },
@@ -283,8 +251,16 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
     suggestionText: { fontSize: 13, color: colors.mutedForeground },
     msgRow: { flexDirection: "row", alignItems: "flex-end", gap: 8, marginBottom: 12 },
     msgRowUser: { justifyContent: "flex-end" },
-    botAvatar: { width: 30, height: 30, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-    userAvatar: { width: 30, height: 30, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+    botAvatar: {
+      width: 30, height: 30, borderRadius: 10,
+      backgroundColor: colors.primary + "20", borderWidth: 1, borderColor: colors.primary + "30",
+      alignItems: "center", justifyContent: "center", flexShrink: 0,
+    },
+    userAvatar: {
+      width: 30, height: 30, borderRadius: 10,
+      backgroundColor: colors.primary,
+      alignItems: "center", justifyContent: "center", flexShrink: 0,
+    },
     userAvatarText: { color: "white", fontSize: 11, fontWeight: "700" as const },
     bubble: { maxWidth: "75%", borderRadius: 16, padding: 14 },
     bubbleUser: { backgroundColor: colors.primary, borderBottomRightRadius: 4 },
@@ -292,10 +268,10 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
     bubbleText: { fontSize: 14, color: colors.foreground, lineHeight: 20 },
     bubbleTextUser: { color: "white" },
     copyBtn: {
-      flexDirection: "row", alignItems: "center", gap: 6,
-      marginTop: 10, backgroundColor: colors.secondary,
-      borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
-      alignSelf: "flex-start",
+      flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10,
+      backgroundColor: colors.primary + "18", borderRadius: 10,
+      paddingHorizontal: 12, paddingVertical: 8, alignSelf: "flex-start",
+      borderWidth: 1, borderColor: colors.primary + "30",
     },
     copyBtnText: { fontSize: 13, color: colors.primary, fontFamily: "Inter_600SemiBold" },
     typingRow: { flexDirection: "row", alignItems: "flex-end", gap: 8, marginBottom: 12 },
@@ -318,8 +294,10 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
       borderWidth: 1.5, borderColor: colors.border,
       maxHeight: 100, fontFamily: "Inter_400Regular",
     },
-    sendBtn: { borderRadius: 20, overflow: "hidden" },
-    sendBtnDisabled: { opacity: 0.5 },
-    sendBtnGradient: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+    sendBtn: { borderRadius: 22, overflow: "hidden" },
+    sendBtnDisabled: { opacity: 0.45 },
+    sendBtnInner: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+    sendBtnActive: { backgroundColor: colors.primary },
+    sendBtnInactive: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   });
 }

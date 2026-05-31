@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import {
@@ -17,19 +16,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useColors } from "@/hooks/useColors";
 
 function formatDate(iso: string) {
-  try {
-    return new Date(iso).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-  } catch {
-    return "—";
-  }
+  try { return new Date(iso).toLocaleDateString("en-US", { month: "short", year: "numeric" }); }
+  catch { return "—"; }
 }
 
 function formatFileDate(iso: string) {
-  try {
-    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch {
-    return "—";
-  }
+  try { return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
+  catch { return "—"; }
 }
 
 export default function ProfileScreen() {
@@ -40,20 +33,14 @@ export default function ProfileScreen() {
 
   if (!user) return null;
 
-  const initials = user.username
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+  const initials = user.username.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 
   const handleLogout = () => {
     if (Platform.OS !== "web") {
       Alert.alert("Logout", "Are you sure you want to logout?", [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Logout",
-          style: "destructive",
+          text: "Logout", style: "destructive",
           onPress: async () => {
             if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
             await logout();
@@ -69,16 +56,17 @@ export default function ProfileScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
         contentContainerStyle={{
-          paddingTop: Platform.OS === "web" ? insets.top + 67 : insets.top + 16,
-          paddingBottom: insets.bottom + 100,
-          paddingHorizontal: 20,
+          paddingTop: Platform.OS === "web" ? insets.top + 67 : insets.top + 20,
+          paddingBottom: insets.bottom + 110,
+          paddingHorizontal: 18,
         }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Profile card */}
         <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.profileCard}>
-          <LinearGradient colors={[colors.gradientStart, colors.gradientEnd, colors.gradientAccent]} style={styles.avatarBg}>
+          <View style={styles.avatarWrap}>
             <Text style={styles.avatarText}>{initials}</Text>
-          </LinearGradient>
+          </View>
           <Text style={styles.username}>{user.username}</Text>
           <Text style={styles.email}>{user.email}</Text>
           <View style={styles.statsRow}>
@@ -99,11 +87,14 @@ export default function ProfileScreen() {
           </View>
         </Animated.View>
 
+        {/* Recent Uploads */}
         <Animated.View entering={FadeInDown.delay(150).springify()}>
           <Text style={styles.sectionTitle}>Recent Uploads</Text>
           {user.uploads.length === 0 ? (
             <View style={styles.emptyUploads}>
-              <Feather name="file-text" size={32} color={colors.mutedForeground} />
+              <View style={styles.emptyIcon}>
+                <Feather name="file-text" size={24} color={colors.mutedForeground} />
+              </View>
               <Text style={styles.emptyTitle}>No uploads yet</Text>
               <Text style={styles.emptyText}>Generate some HTML and your uploads will appear here.</Text>
             </View>
@@ -111,7 +102,7 @@ export default function ProfileScreen() {
             <View style={styles.uploadsList}>
               {user.uploads.map((u, i) => (
                 <Animated.View key={u.id} entering={FadeInDown.delay(170 + i * 40).springify()}>
-                  <View style={styles.uploadRow}>
+                  <View style={[styles.uploadRow, i < user.uploads.length - 1 && styles.uploadRowBorder]}>
                     <View style={styles.fileIcon}>
                       <Feather name="file-text" size={16} color={colors.primary} />
                     </View>
@@ -126,17 +117,22 @@ export default function ProfileScreen() {
           )}
         </Animated.View>
 
+        {/* Account menu */}
         <Animated.View entering={FadeInDown.delay(300).springify()}>
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.menuCard}>
-            <Pressable style={styles.menuRow}>
-              <Feather name="settings" size={18} color={colors.primary} />
+            <Pressable style={({ pressed }) => [styles.menuRow, pressed && { opacity: 0.7 }]}>
+              <View style={[styles.menuIconWrap, { backgroundColor: colors.primary + "18" }]}>
+                <Feather name="settings" size={16} color={colors.primary} />
+              </View>
               <Text style={styles.menuLabel}>Settings</Text>
               <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
             </Pressable>
             <View style={styles.menuDivider} />
-            <Pressable style={styles.menuRow}>
-              <Feather name="help-circle" size={18} color={colors.accent} />
+            <Pressable style={({ pressed }) => [styles.menuRow, pressed && { opacity: 0.7 }]}>
+              <View style={[styles.menuIconWrap, { backgroundColor: colors.accent + "18" }]}>
+                <Feather name="help-circle" size={16} color={colors.accent} />
+              </View>
               <Text style={styles.menuLabel}>Help & Support</Text>
               <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
             </Pressable>
@@ -145,7 +141,9 @@ export default function ProfileScreen() {
               style={({ pressed }) => [styles.menuRow, pressed && { opacity: 0.7 }]}
               onPress={handleLogout}
             >
-              <Feather name="log-out" size={18} color={colors.destructive} />
+              <View style={[styles.menuIconWrap, { backgroundColor: colors.destructive + "18" }]}>
+                <Feather name="log-out" size={16} color={colors.destructive} />
+              </View>
               <Text style={[styles.menuLabel, { color: colors.destructive }]}>Logout</Text>
               <Feather name="chevron-right" size={16} color={colors.destructive} />
             </Pressable>
@@ -160,12 +158,16 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
   return StyleSheet.create({
     profileCard: {
       backgroundColor: colors.card, borderRadius: colors.radius,
-      padding: 28, alignItems: "center", marginBottom: 28,
+      padding: 24, alignItems: "center", marginBottom: 28,
       borderWidth: 1, borderColor: colors.border,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 4,
     },
-    avatarBg: { width: 80, height: 80, borderRadius: 24, alignItems: "center", justifyContent: "center", marginBottom: 14 },
-    avatarText: { color: "white", fontSize: 28, fontWeight: "800" as const },
+    avatarWrap: {
+      width: 80, height: 80, borderRadius: 24,
+      backgroundColor: colors.primary + "25",
+      borderWidth: 2, borderColor: colors.primary + "45",
+      alignItems: "center", justifyContent: "center", marginBottom: 14,
+    },
+    avatarText: { color: colors.primary, fontSize: 28, fontWeight: "800" as const },
     username: { fontSize: 20, fontWeight: "700" as const, color: colors.foreground, marginBottom: 4 },
     email: { fontSize: 14, color: colors.mutedForeground, marginBottom: 20 },
     statsRow: { flexDirection: "row", alignItems: "center", width: "100%" },
@@ -173,11 +175,14 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
     statValue: { fontSize: 16, fontWeight: "700" as const, color: colors.primary },
     statLabel: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
     statDivider: { width: 1, height: 32, backgroundColor: colors.border },
-    sectionTitle: { fontSize: 17, fontWeight: "700" as const, color: colors.foreground, marginBottom: 14, letterSpacing: -0.3 },
+    sectionTitle: { fontSize: 18, fontWeight: "700" as const, color: colors.foreground, marginBottom: 14, letterSpacing: -0.3 },
     emptyUploads: {
       backgroundColor: colors.card, borderRadius: colors.radius, padding: 32,
-      alignItems: "center", gap: 8, borderWidth: 1, borderColor: colors.border,
-      marginBottom: 28,
+      alignItems: "center", gap: 10, borderWidth: 1, borderColor: colors.border, marginBottom: 28,
+    },
+    emptyIcon: {
+      width: 52, height: 52, borderRadius: 16,
+      backgroundColor: colors.muted, alignItems: "center", justifyContent: "center",
     },
     emptyTitle: { fontSize: 16, fontWeight: "600" as const, color: colors.foreground },
     emptyText: { fontSize: 13, color: colors.mutedForeground, textAlign: "center", lineHeight: 18 },
@@ -185,14 +190,13 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
       backgroundColor: colors.card, borderRadius: colors.radius,
       borderWidth: 1, borderColor: colors.border, overflow: "hidden", marginBottom: 28,
     },
-    uploadRow: {
-      flexDirection: "row", alignItems: "center", gap: 12,
-      paddingHorizontal: 16, paddingVertical: 14,
-      borderBottomWidth: 1, borderBottomColor: colors.border,
-    },
+    uploadRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+    uploadRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
     fileIcon: {
-      width: 36, height: 36, borderRadius: 10,
-      backgroundColor: colors.secondary, alignItems: "center", justifyContent: "center",
+      width: 38, height: 38, borderRadius: 11,
+      backgroundColor: colors.primary + "18",
+      borderWidth: 1, borderColor: colors.primary + "30",
+      alignItems: "center", justifyContent: "center",
     },
     fileName: { fontSize: 14, fontWeight: "600" as const, color: colors.foreground },
     fileMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
@@ -201,7 +205,8 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
       borderWidth: 1, borderColor: colors.border, overflow: "hidden", marginBottom: 28,
     },
     menuRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 16 },
+    menuIconWrap: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
     menuLabel: { flex: 1, fontSize: 15, color: colors.foreground, fontFamily: "Inter_500Medium" },
-    menuDivider: { height: 1, backgroundColor: colors.border, marginLeft: 46 },
+    menuDivider: { height: 1, backgroundColor: colors.border, marginLeft: 62 },
   });
 }

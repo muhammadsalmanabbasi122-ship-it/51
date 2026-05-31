@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -58,9 +57,7 @@ export default function CommunityScreen() {
   const flatListRef = useRef<FlatList>(null);
   const styles = makeStyles(colors);
 
-  const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
-    ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
-    : "";
+  const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -81,10 +78,7 @@ export default function CommunityScreen() {
   useEffect(() => {
     fetchMessages();
     fetchOnline();
-    const interval = setInterval(() => {
-      fetchMessages();
-      fetchOnline();
-    }, 3000);
+    const interval = setInterval(() => { fetchMessages(); fetchOnline(); }, 3000);
     return () => clearInterval(interval);
   }, [fetchMessages, fetchOnline]);
 
@@ -112,19 +106,19 @@ export default function CommunityScreen() {
     return (
       <View style={[styles.msgRow, isMe && styles.msgRowMe]}>
         {!isMe && (
-          <View style={[styles.avatar, { backgroundColor: color }]}>
-            <Text style={styles.avatarText}>{item.initials}</Text>
+          <View style={[styles.avatar, { backgroundColor: color + "22", borderColor: color + "44", borderWidth: 1 }]}>
+            <Text style={[styles.avatarText, { color }]}>{item.initials}</Text>
           </View>
         )}
         <View style={[styles.bubble, isMe && styles.bubbleMe]}>
-          {!isMe && <Text style={[styles.username, { color }]}>{item.username}</Text>}
+          {!isMe && <Text style={[styles.msgUsername, { color }]}>{item.username}</Text>}
           <Text style={[styles.msgText, isMe && styles.msgTextMe]}>{item.text}</Text>
           <Text style={[styles.time, isMe && styles.timeMe]}>{timeAgo(item.timestamp)}</Text>
         </View>
         {isMe && (
-          <LinearGradient colors={[colors.primary, colors.gradientEnd]} style={styles.avatar}>
-            <Text style={styles.avatarText}>{item.initials}</Text>
-          </LinearGradient>
+          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.avatarText, { color: "white" }]}>{item.initials}</Text>
+          </View>
         )}
       </View>
     );
@@ -132,14 +126,11 @@ export default function CommunityScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={[
-          styles.header,
-          { paddingTop: Platform.OS === "web" ? insets.top + 67 : insets.top + 16 },
-        ]}
-      >
+      <View style={[styles.header, { paddingTop: Platform.OS === "web" ? insets.top + 67 : insets.top + 16 }]}>
         <View style={styles.headerLeft}>
-          <Feather name="message-circle" size={20} color={colors.primary} />
+          <View style={styles.headerIconWrap}>
+            <Feather name="message-circle" size={18} color="#34D399" />
+          </View>
           <Text style={styles.headerTitle}>Community</Text>
         </View>
         <View style={styles.onlineBadge}>
@@ -155,15 +146,18 @@ export default function CommunityScreen() {
             data={onlineUsers}
             keyExtractor={(u) => u.username}
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
-            renderItem={({ item }) => (
-              <View style={styles.onlineUser}>
-                <View style={[styles.onlineAvatar, { backgroundColor: avatarColor(item.username) }]}>
-                  <Text style={styles.onlineAvatarText}>{item.initials}</Text>
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+            renderItem={({ item }) => {
+              const c = avatarColor(item.username);
+              return (
+                <View style={styles.onlineUser}>
+                  <View style={[styles.onlineAvatar, { backgroundColor: c + "22", borderColor: c + "44", borderWidth: 1 }]}>
+                    <Text style={[styles.onlineAvatarText, { color: c }]}>{item.initials}</Text>
+                  </View>
+                  <Text style={styles.onlineUsername} numberOfLines={1}>{item.username.split(" ")[0]}</Text>
                 </View>
-                <Text style={styles.onlineUsername} numberOfLines={1}>{item.username.split(" ")[0]}</Text>
-              </View>
-            )}
+              );
+            }}
           />
         </View>
       )}
@@ -174,10 +168,7 @@ export default function CommunityScreen() {
           data={messages}
           keyExtractor={(m) => m.id}
           renderItem={renderMsg}
-          contentContainerStyle={{
-            paddingHorizontal: 16, paddingVertical: 12,
-            paddingBottom: insets.bottom + 110,
-          }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, paddingBottom: insets.bottom + 110 }}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -189,12 +180,7 @@ export default function CommunityScreen() {
           }
         />
 
-        <View
-          style={[
-            styles.inputContainer,
-            { paddingBottom: Platform.OS === "ios" ? 0 : insets.bottom + 8 },
-          ]}
-        >
+        <View style={[styles.inputContainer, { paddingBottom: Platform.OS === "ios" ? 0 : insets.bottom + 8 }]}>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.textInput}
@@ -215,20 +201,13 @@ export default function CommunityScreen() {
               onPress={sendMessage}
               disabled={!input.trim() || sending}
             >
-              <LinearGradient
-                colors={
-                  input.trim() && !sending
-                    ? [colors.primary, colors.accent]
-                    : [colors.muted, colors.muted]
-                }
-                style={styles.sendBtnGradient}
-              >
+              <View style={[styles.sendBtnInner, input.trim() && !sending ? styles.sendBtnActive : styles.sendBtnInactive]}>
                 {sending ? (
                   <ActivityIndicator size="small" color={colors.mutedForeground} />
                 ) : (
                   <Feather name="send" size={18} color={input.trim() ? "white" : colors.mutedForeground} />
                 )}
-              </LinearGradient>
+              </View>
             </Pressable>
           </View>
         </View>
@@ -246,26 +225,43 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
       backgroundColor: colors.background,
     },
     headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+    headerIconWrap: {
+      width: 36, height: 36, borderRadius: 10,
+      backgroundColor: "#065F4622",
+      borderWidth: 1, borderColor: "#34D39930",
+      alignItems: "center", justifyContent: "center",
+    },
     headerTitle: { fontSize: 17, fontWeight: "700" as const, color: colors.foreground },
-    onlineBadge: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.secondary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-    onlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#10B981" },
-    onlineCount: { fontSize: 12, color: "#10B981", fontFamily: "Inter_600SemiBold" },
+    onlineBadge: {
+      flexDirection: "row", alignItems: "center", gap: 6,
+      backgroundColor: "rgba(34,197,94,0.1)", borderWidth: 1, borderColor: "rgba(34,197,94,0.2)",
+      paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
+    },
+    onlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success },
+    onlineCount: { fontSize: 12, color: colors.success, fontFamily: "Inter_600SemiBold" },
     onlineBar: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
     onlineUser: { alignItems: "center", gap: 4, width: 52 },
     onlineAvatar: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-    onlineAvatarText: { color: "white", fontSize: 12, fontWeight: "700" as const },
+    onlineAvatarText: { fontSize: 12, fontWeight: "700" as const },
     onlineUsername: { fontSize: 10, color: colors.mutedForeground, textAlign: "center" },
     msgRow: { flexDirection: "row", alignItems: "flex-end", gap: 8, marginBottom: 12 },
     msgRowMe: { justifyContent: "flex-end" },
     avatar: { width: 32, height: 32, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-    avatarText: { color: "white", fontSize: 11, fontWeight: "700" as const },
-    bubble: { maxWidth: "75%", backgroundColor: colors.card, borderRadius: 16, borderBottomLeftRadius: 4, padding: 12, borderWidth: 1, borderColor: colors.border },
-    bubbleMe: { backgroundColor: colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 4, borderWidth: 0 },
-    username: { fontSize: 12, fontFamily: "Inter_600SemiBold", marginBottom: 4 },
+    avatarText: { fontSize: 11, fontWeight: "700" as const },
+    bubble: {
+      maxWidth: "75%", backgroundColor: colors.card,
+      borderRadius: 16, borderBottomLeftRadius: 4, padding: 12,
+      borderWidth: 1, borderColor: colors.border,
+    },
+    bubbleMe: {
+      backgroundColor: colors.primary, borderBottomLeftRadius: 16,
+      borderBottomRightRadius: 4, borderWidth: 0,
+    },
+    msgUsername: { fontSize: 12, fontFamily: "Inter_600SemiBold", marginBottom: 4 },
     msgText: { fontSize: 14, color: colors.foreground, lineHeight: 20 },
     msgTextMe: { color: "white" },
     time: { fontSize: 10, color: colors.mutedForeground, marginTop: 4, alignSelf: "flex-end" },
-    timeMe: { color: "rgba(255,255,255,0.6)" },
+    timeMe: { color: "rgba(255,255,255,0.55)" },
     empty: { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 60, gap: 12 },
     emptyText: { fontSize: 14, color: colors.mutedForeground },
     inputContainer: {
@@ -282,7 +278,9 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
       fontFamily: "Inter_400Regular",
     },
     sendBtn: { borderRadius: 22, overflow: "hidden" },
-    sendBtnDisabled: { opacity: 0.5 },
-    sendBtnGradient: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+    sendBtnDisabled: { opacity: 0.45 },
+    sendBtnInner: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+    sendBtnActive: { backgroundColor: colors.primary },
+    sendBtnInactive: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   });
 }
