@@ -1,0 +1,31 @@
+run = "cd artifacts/api-server && PORT=3000 node --enable-source-maps ./dist/index.mjs"
+
+[[workflows]]
+name = "API Server"
+
+[[workflows.tasks]]
+name = "Build & Start API Server"
+command = "cd artifacts/api-server && pnpm run build && PORT=3000 node --enable-source-maps ./dist/index.mjs"
+mode = "parallel"
+
+[[workflows]]
+name = "Mobile App (Expo)"
+
+[[workflows.tasks]]
+name = "Start Expo"
+command = "cd artifacts/mobile && PORT=8081 pnpm run dev"
+mode = "parallel"
+
+[[workflows]]
+name = "Component Preview Server"
+
+[[workflows.tasks]]
+name = "Start Preview Server"
+command = "cd artifacts/mockup-sandbox && pnpm run dev"
+mode = "parallel"
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["cd", "artifacts/api-server", "&&", "PORT=3000", "node", "--enable-source-maps", "./dist/index.mjs"]
