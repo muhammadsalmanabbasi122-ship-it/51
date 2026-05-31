@@ -40,13 +40,13 @@ waitForPort = 3000
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=8080 pnpm --filter @workspace/mobile run dev"
-waitForPort = 8080
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "DANGEROUSLY_DISABLE_HOST_CHECK=true PORT=8080 pnpm --filter @workspace/mobile run dev"
+waitForPort = 8080
 
 [agent]
 stack = "PNPM_WORKSPACE"
