@@ -122,14 +122,6 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.menuCard}>
             <Pressable style={({ pressed }) => [styles.menuRow, pressed && { opacity: 0.7 }]}>
-              <View style={[styles.menuIconWrap, { backgroundColor: colors.primary + "18" }]}>
-                <Feather name="settings" size={16} color={colors.primary} />
-              </View>
-              <Text style={styles.menuLabel}>Settings</Text>
-              <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
-            </Pressable>
-            <View style={styles.menuDivider} />
-            <Pressable style={({ pressed }) => [styles.menuRow, pressed && { opacity: 0.7 }]}>
               <View style={[styles.menuIconWrap, { backgroundColor: colors.accent + "18" }]}>
                 <Feather name="help-circle" size={16} color={colors.accent} />
               </View>
