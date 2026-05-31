@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "-93jBfst8-_i9tg3IdafN"
+uri = "file://artifacts/mobile/assets/images/icon.png"
+type = "image"
+title = "html-creator-icon"
