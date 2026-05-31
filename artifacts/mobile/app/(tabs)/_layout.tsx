@@ -136,6 +136,13 @@ function ClassicTabLayout() {
             ),
         }}
       />
+      <Tabs.Screen
+        name="help"
+        options={{
+          title: "Help & Support",
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

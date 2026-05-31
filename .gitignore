@@ -47,3 +47,17 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+.replit
+.replitignore
+**/.replit-artifact/
+replit.md
+
+# Runtime/agent metadata
+.agents/
+
+# Generated files
+src/.generated/
+**/src/.generated/
+
+# Dev config
+.npmrc

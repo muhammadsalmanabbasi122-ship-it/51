@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
   Alert,
@@ -28,6 +29,7 @@ function formatFileDate(iso: string) {
 export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const styles = makeStyles(colors);
 
@@ -121,7 +123,10 @@ export default function ProfileScreen() {
         <Animated.View entering={FadeInDown.delay(300).springify()}>
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.menuCard}>
-            <Pressable style={({ pressed }) => [styles.menuRow, pressed && { opacity: 0.7 }]}>
+            <Pressable
+              style={({ pressed }) => [styles.menuRow, pressed && { opacity: 0.7 }]}
+              onPress={() => router.push("/(tabs)/help")}
+            >
               <View style={[styles.menuIconWrap, { backgroundColor: colors.accent + "18" }]}>
                 <Feather name="help-circle" size={16} color={colors.accent} />
               </View>
