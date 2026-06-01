@@ -20,10 +20,6 @@ author = "agent"
 task = "workflow.run"
 args = "Start Backend"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Start application"
-
 [[workflows.workflow]]
 name = "Start Backend"
 author = "agent"
@@ -35,18 +31,6 @@ outputType = "console"
 task = "shell.exec"
 args = "PORT=3000 pnpm --filter @workspace/api-server run dev"
 waitForPort = 3000
-
-[[workflows.workflow]]
-name = "Start application"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "DANGEROUSLY_DISABLE_HOST_CHECK=true PORT=8080 pnpm --filter @workspace/mobile run dev"
-waitForPort = 8080
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -63,3 +47,7 @@ externalPort = 80
 [[ports]]
 localPort = 8080
 externalPort = 8080
+
+[[ports]]
+localPort = 18115
+externalPort = 3000
