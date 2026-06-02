@@ -3,6 +3,7 @@ import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -13,7 +14,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,6 +43,7 @@ export default function AIScreen() {
   const [input, setInput] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [streamingId, setStreamingId] = useState<string | null>(null);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [streamedText, setStreamedText] = useState("");
   const typeRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [sessions, setSessions] = useState<AIChatSession[]>([]);
@@ -129,6 +131,7 @@ export default function AIScreen() {
       id: assistId, role: "assistant", text: "", timestamp: new Date(),
     };
     setMessages((prev) => [...prev, placeholder]);
+    setGeneratingId(assistId);
 
     try {
       const domain = process.env.EXPO_PUBLIC_DOMAIN;
@@ -144,10 +147,12 @@ export default function AIScreen() {
         id: assistId, role: "assistant", text: "",
         html: fullHtml, timestamp: new Date(),
       };
+      setGeneratingId(null);
       setMessages((prev) => prev.map((m) => (m.id === assistId ? finalMsg : m)));
       startTyping(fullHtml, assistId);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
+      setGeneratingId(null);
       setMessages((prev) => [
         ...prev.filter((m) => m.id !== assistId),
         { id: assistId, role: "assistant", text: "Something went wrong. Please try again.", timestamp: new Date() },
@@ -165,12 +170,18 @@ export default function AIScreen() {
   const renderMessage = ({ item }: { item: Message }) => {
     const isUser = item.role === "user";
     const isStreaming = streamingId === item.id && !isUser;
+    const isGeneratingThis = generatingId === item.id && !isUser;
     const displayHtml = isStreaming ? streamedText : item.html;
     if (!isUser) {
       return (
         <Animated.View entering={FadeInDown.duration(300)} style={styles.msgRowAssistant}>
           <View style={styles.bubbleFull}>
-            {displayHtml ? (
+            {isGeneratingThis ? (
+              <View style={[styles.codeBoxFull, styles.generatingBox]}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={styles.generatingText}>Generating HTML...</Text>
+              </View>
+            ) : displayHtml ? (
               <View style={styles.codeBoxFull}>
                 <ScrollView
                   showsVerticalScrollIndicator
@@ -416,6 +427,12 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
     codeText: {
       fontFamily: Platform.OS === "ios" ? "Menlo" : Platform.OS === "android" ? "monospace" : "Courier New",
       fontSize: 12, color: colors.foreground, lineHeight: 18,
+    },
+    generatingBox: {
+      flexDirection: "row", alignItems: "center", gap: 10, minHeight: 48,
+    },
+    generatingText: {
+      color: colors.primary, fontSize: 13, fontFamily: "Inter_400Regular", opacity: 0.85,
     },
     cursor: {
       width: 8, height: 16, backgroundColor: colors.primary, borderRadius: 2,
