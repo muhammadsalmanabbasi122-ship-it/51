@@ -25,3 +25,14 @@ run = [ "pnpm", "--filter", "@workspace/mobile", "run", "serve" ]
 [services.env]
 PORT = "18115"
 BASE_PATH = "/"
+
+[[services]]
+name = "api"
+paths = [ "/api" ]
+localPort = 3000
+
+[services.development]
+run = "PORT=3000 pnpm --filter @workspace/api-server run dev"
+
+[services.env]
+PORT = "3000"
