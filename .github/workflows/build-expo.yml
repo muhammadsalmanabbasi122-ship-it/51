@@ -67,11 +67,18 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon
 
+      - name: Find and upload APK
+        id: find-apk
+        run: |
+          APK=$(find artifacts/mobile/android -name "*.apk" -type f | head -1)
+          echo "APK_PATH=$APK" >> $GITHUB_ENV
+          echo "Found APK at: $APK"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: artifacts/mobile/android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: ${{ env.APK_PATH }}
           if-no-files-found: error
           retention-days: 30
 
@@ -141,7 +148,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release-aab
-          path: artifacts/mobile/android/app/build/outputs/bundle/release/app-release.aab
+          path: artifacts/mobile/android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: warn
           retention-days: 90
 
