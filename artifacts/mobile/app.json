@@ -29,7 +29,11 @@
     },
     "updates": {
       "enabled": false,
-      "checkAutomatically": "NEVER"
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     },
     "plugins": [
       "expo-router",
