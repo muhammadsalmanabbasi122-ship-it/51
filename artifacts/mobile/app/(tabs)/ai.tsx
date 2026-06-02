@@ -250,6 +250,10 @@ export default function AIScreen() {
                   </Pressable>
                 )}
               </View>
+            ) : item.text ? (
+              <View style={styles.alertBox}>
+                <Text style={styles.alertText}>{item.text}</Text>
+              </View>
             ) : (
               <View style={styles.codeBoxFull}>
                 <View style={styles.cursor} />
@@ -471,6 +475,13 @@ function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useCol
     codeText: {
       fontFamily: Platform.OS === "ios" ? "Menlo" : Platform.OS === "android" ? "monospace" : "Courier New",
       fontSize: 12, color: colors.foreground, lineHeight: 18,
+    },
+    alertBox: {
+      backgroundColor: colors.primary + "12", borderRadius: 14,
+      padding: 14, borderWidth: 1, borderColor: colors.primary + "30",
+    },
+    alertText: {
+      fontSize: 14, color: colors.foreground, fontFamily: "Inter_400Regular", lineHeight: 22,
     },
     generatingBox: {
       flexDirection: "row", alignItems: "center", gap: 10, minHeight: 48,
