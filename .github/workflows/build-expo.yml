@@ -44,6 +44,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate mockup components stub
+        run: |
+          mkdir -p artifacts/mockup-sandbox/src/.generated
+          cat > artifacts/mockup-sandbox/src/.generated/mockup-components.ts << 'EOF'
+          type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
+          export const modules: ModuleMap = {
+
+          };
+          EOF
+
       - name: Typecheck
         run: pnpm typecheck
 
