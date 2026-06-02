@@ -16,7 +16,7 @@ import {
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { getApiKey, saveApiKey, clearApiKey } from "@/lib/apiKey";
+import { getApiKey, saveApiKey, clearApiKey, getModel, saveModel, clearModel, DEFAULT_MODEL } from "@/lib/apiKey";
 
 export default function SettingsScreen() {
   const colors = useColors();
@@ -31,9 +31,16 @@ export default function SettingsScreen() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const [currentModel, setCurrentModel] = useState(DEFAULT_MODEL);
+  const [editingModel, setEditingModel] = useState(false);
+  const [inputModel, setInputModel] = useState("");
+  const [isCustomModel, setIsCustomModel] = useState(false);
+
   useEffect(() => {
-    getApiKey().then((k) => {
+    Promise.all([getApiKey(), getModel()]).then(([k, m]) => {
       setSavedKey(k);
+      setCurrentModel(m);
+      setIsCustomModel(m !== DEFAULT_MODEL);
       setLoading(false);
     });
   }, []);
@@ -74,6 +81,25 @@ export default function SettingsScreen() {
     setEditing(false);
     setInputKey("");
     setShowKey(false);
+  };
+
+  const handleSaveModel = async () => {
+    if (!inputModel.trim()) return;
+    await saveModel(inputModel.trim());
+    setCurrentModel(inputModel.trim());
+    setIsCustomModel(inputModel.trim() !== DEFAULT_MODEL);
+    setEditingModel(false);
+    setInputModel("");
+    if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const handleDeleteModel = async () => {
+    await clearModel();
+    setCurrentModel(DEFAULT_MODEL);
+    setIsCustomModel(false);
+    setEditingModel(false);
+    setInputModel("");
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   if (loading) {
@@ -219,15 +245,73 @@ export default function SettingsScreen() {
             <View style={styles.cardHeader}>
               <Feather name="cpu" size={16} color={colors.primary} />
               <Text style={styles.cardTitle}>AI Model</Text>
+              {isCustomModel && (
+                <View style={styles.savedPill}>
+                  <Text style={styles.savedPillText}>Custom</Text>
+                </View>
+              )}
             </View>
-            <View style={styles.modelBadge}>
-              <Text style={styles.modelName}>moonshotai/kimi-k2</Text>
-              <View style={styles.modelActiveDot} />
-              <Text style={styles.modelStatus}>Active</Text>
-            </View>
-            <Text style={styles.cardDesc}>
-              Kimi K2 is a powerful model that generates beautiful, production-ready HTML/CSS pages.
-            </Text>
+
+            {!editingModel ? (
+              <>
+                <View style={styles.modelBadge}>
+                  <Text style={styles.modelName} numberOfLines={1}>{currentModel}</Text>
+                  <View style={styles.modelActiveDot} />
+                  <Text style={styles.modelStatus}>Active</Text>
+                </View>
+
+                <View style={styles.actionRow}>
+                  <Pressable
+                    style={({ pressed }) => [styles.actionBtn, styles.editBtn, pressed && { opacity: 0.75 }]}
+                    onPress={() => { setInputModel(currentModel); setEditingModel(true); }}
+                  >
+                    <Feather name="edit-2" size={14} color={colors.primary} />
+                    <Text style={[styles.actionBtnText, { color: colors.primary }]}>Change</Text>
+                  </Pressable>
+                  {isCustomModel && (
+                    <Pressable
+                      style={({ pressed }) => [styles.actionBtn, styles.removeBtn, pressed && { opacity: 0.75 }]}
+                      onPress={handleDeleteModel}
+                    >
+                      <Feather name="trash-2" size={14} color={(colors as Record<string,string>).destructive ?? "#ef4444"} />
+                      <Text style={[styles.actionBtnText, { color: (colors as Record<string,string>).destructive ?? "#ef4444" }]}>Reset to Default</Text>
+                    </Pressable>
+                  )}
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. openai/gpt-4o"
+                    placeholderTextColor={colors.mutedForeground}
+                    value={inputModel}
+                    onChangeText={setInputModel}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoFocus
+                  />
+                </View>
+                <View style={styles.actionRow}>
+                  <Pressable
+                    style={({ pressed }) => [styles.saveBtn, !inputModel.trim() && styles.saveBtnDisabled, pressed && inputModel.trim() && { opacity: 0.8 }]}
+                    onPress={handleSaveModel}
+                    disabled={!inputModel.trim()}
+                  >
+                    <Feather name="check" size={15} color="white" />
+                    <Text style={styles.saveBtnText}>Save Model</Text>
+                  </Pressable>
+                  <Pressable
+                    style={({ pressed }) => [styles.actionBtn, styles.cancelBtn, pressed && { opacity: 0.75 }]}
+                    onPress={() => { setEditingModel(false); setInputModel(""); }}
+                  >
+                    <Feather name="x" size={14} color={colors.mutedForeground} />
+                    <Text style={[styles.actionBtnText, { color: colors.mutedForeground }]}>Cancel</Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
           </View>
 
         </Animated.View>

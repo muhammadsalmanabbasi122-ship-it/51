@@ -21,7 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { Message } from "@/lib/chatHistory";
 import { getSessions, saveSession, deleteSession } from "@/lib/chatHistory";
 import type { AIChatSession } from "@/lib/chatHistory";
-import { getApiKey } from "@/lib/apiKey";
+import { getApiKey, getModel } from "@/lib/apiKey";
 
 
 function timeAgo(dateStr: string): string {
@@ -148,6 +148,7 @@ export default function AIScreen() {
     setGeneratingId(assistId);
 
     try {
+      const model = await getModel();
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -157,7 +158,7 @@ export default function AIScreen() {
           "X-Title": "HTML Creator",
         },
         body: JSON.stringify({
-          model: "moonshotai/kimi-k2",
+          model,
           max_tokens: 8192,
           messages: [
             {
