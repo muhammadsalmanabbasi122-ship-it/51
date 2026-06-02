@@ -21,6 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { Message } from "@/lib/chatHistory";
 import { getSessions, saveSession, deleteSession } from "@/lib/chatHistory";
 import type { AIChatSession } from "@/lib/chatHistory";
+import { getApiKey } from "@/lib/apiKey";
 
 
 function timeAgo(dateStr: string): string {
@@ -126,6 +127,19 @@ export default function AIScreen() {
     setInput("");
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
+    const apiKey = await getApiKey();
+    if (!apiKey) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(), role: "assistant",
+          text: "⚙️ Settings tab mein jaake pehle apni OpenRouter API key save karo, phir AI generate hoga.",
+          timestamp: new Date(),
+        },
+      ]);
+      return;
+    }
+
     const assistId = (Date.now() + 1).toString();
     const placeholder: Message = {
       id: assistId, role: "assistant", text: "", timestamp: new Date(),
@@ -134,15 +148,37 @@ export default function AIScreen() {
     setGeneratingId(assistId);
 
     try {
-      const domain = process.env.EXPO_PUBLIC_DOMAIN;
-      const baseUrl = domain ? `https://${domain}` : "";
-      const res = await fetch(`${baseUrl}/api/ai/generate`, {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: trimmed, username: user?.username }),
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://htmlcreator.app",
+          "X-Title": "HTML Creator",
+        },
+        body: JSON.stringify({
+          model: "moonshotai/kimi-k2",
+          max_tokens: 8192,
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert HTML/CSS developer. When given a description, generate a single complete, beautiful, modern HTML file. Return ONLY valid HTML — no markdown, no code fences. Include all CSS in a <style> tag. Use Google Fonts, gradients, shadows, rounded corners. Make it fully responsive and production-ready.",
+            },
+            { role: "user", content: `Create a complete HTML webpage for: ${trimmed}` },
+          ],
+        }),
       });
-      const data = (await res.json()) as { html: string; title: string };
-      const fullHtml = data.html;
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`OpenRouter ${res.status}: ${errText}`);
+      }
+
+      const data = (await res.json()) as { choices: { message: { content: string } }[] };
+      const raw = data.choices[0]?.message?.content ?? "";
+      const fullHtml = raw
+        .replace(/^```html\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+
       const finalMsg: Message = {
         id: assistId, role: "assistant", text: "",
         html: fullHtml, timestamp: new Date(),
@@ -151,11 +187,19 @@ export default function AIScreen() {
       setMessages((prev) => prev.map((m) => (m.id === assistId ? finalMsg : m)));
       startTyping(fullHtml, assistId);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch {
+    } catch (err: unknown) {
       setGeneratingId(null);
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      const isCredits = msg.includes("402") || msg.includes("credits");
       setMessages((prev) => [
         ...prev.filter((m) => m.id !== assistId),
-        { id: assistId, role: "assistant", text: "Something went wrong. Please try again.", timestamp: new Date() },
+        {
+          id: assistId, role: "assistant",
+          text: isCredits
+            ? "❌ API key mein credits nahi hain. openrouter.ai/settings/credits par jaake credits add karo."
+            : `❌ Error: ${msg}`,
+          timestamp: new Date(),
+        },
       ]);
     }
   };
