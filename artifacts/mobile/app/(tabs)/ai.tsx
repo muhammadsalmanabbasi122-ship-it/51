@@ -3,7 +3,6 @@ import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -85,22 +84,14 @@ export default function AIScreen() {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }, []);
 
-  const deleteChat = useCallback((id: string) => {
-    Alert.alert("Delete chat", "Are you sure you want to delete this chat?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          await deleteSession(id);
-          setSessions((prev) => prev.filter((s) => s.id !== id));
-          if (currentSessionId === id) {
-            setCurrentSessionId(null);
-            setMessages([]);
-          }
-        },
-      },
-    ]);
+  const deleteChat = useCallback(async (id: string) => {
+    await deleteSession(id);
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+    if (currentSessionId === id) {
+      setCurrentSessionId(null);
+      setMessages([]);
+    }
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   }, [currentSessionId]);
 
   const startTyping = useCallback((html: string, msgId: string) => {
