@@ -273,8 +273,8 @@ export default function SettingsScreen() {
                       style={({ pressed }) => [styles.actionBtn, styles.removeBtn, pressed && { opacity: 0.75 }]}
                       onPress={handleDeleteModel}
                     >
-                      <Feather name="trash-2" size={14} color={(colors as Record<string,string>).destructive ?? "#ef4444"} />
-                      <Text style={[styles.actionBtnText, { color: (colors as Record<string,string>).destructive ?? "#ef4444" }]}>Reset to Default</Text>
+                      <Feather name="trash-2" size={14} color={colors.destructive ?? "#ef4444"} />
+                      <Text style={[styles.actionBtnText, { color: colors.destructive ?? "#ef4444" }]}>Reset to Default</Text>
                     </Pressable>
                   )}
                 </View>
@@ -321,7 +321,7 @@ export default function SettingsScreen() {
 }
 
 function makeStyles(colors: ReturnType<typeof import("@/hooks/useColors").useColors>, insets: { top: number; bottom: number }) {
-  const destructive = (colors as Record<string, string>).destructive ?? "#ef4444";
+  const destructive = colors.destructive ?? "#ef4444";
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     content: { padding: 16, paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 },

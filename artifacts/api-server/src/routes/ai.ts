@@ -20,9 +20,9 @@ Rules:
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 50000);
 
-  let res: Response;
+  let response: Awaited<ReturnType<typeof fetch>>;
   try {
-    res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
@@ -44,12 +44,12 @@ Rules:
     clearTimeout(timeout);
   }
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`OpenRouter error ${res.status}: ${err}`);
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`OpenRouter error ${response.status}: ${err}`);
   }
 
-  const data = (await res.json()) as {
+  const data = (await response.json()) as {
     choices: { message: { content: string } }[];
   };
 
