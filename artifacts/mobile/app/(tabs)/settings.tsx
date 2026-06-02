@@ -84,7 +84,7 @@ export default function SettingsScreen() {
               <Feather name="settings" size={22} color={colors.primary} />
             </View>
             <Text style={styles.title}>Settings</Text>
-            <Text style={styles.subtitle}>Configure your AI generator</Text>
+            <Text style={styles.subtitle}>Configure your AI settings</Text>
           </View>
 
           <View style={styles.card}>
@@ -93,7 +93,7 @@ export default function SettingsScreen() {
               <Text style={styles.cardTitle}>OpenRouter API Key</Text>
             </View>
             <Text style={styles.cardDesc}>
-              AI generator ke liye apni OpenRouter key daalo. Key sirf aapke device pe save hoti hai.
+              Enter your OpenRouter API key to enable AI generation. Your key is stored only on this device.
             </Text>
 
             {savedKey && (
@@ -158,17 +158,17 @@ export default function SettingsScreen() {
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Feather name="help-circle" size={16} color={colors.primary} />
-              <Text style={styles.cardTitle}>API Key Kahan Se Milegi?</Text>
+              <Text style={styles.cardTitle}>Where to Get an API Key?</Text>
             </View>
             <Text style={styles.cardDesc}>
-              Free API key banane ke liye openrouter.ai par jaao, account banaao, phir Keys section se naya key generate karo.
+              Create a free API key at openrouter.ai — sign up, then go to the Keys section to generate a new key.
             </Text>
             <Pressable
               style={({ pressed }) => [styles.linkBtn, pressed && { opacity: 0.7 }]}
               onPress={() => Linking.openURL("https://openrouter.ai/keys")}
             >
               <Feather name="external-link" size={14} color={colors.primary} />
-              <Text style={styles.linkBtnText}>openrouter.ai/keys kholein</Text>
+              <Text style={styles.linkBtnText}>Open openrouter.ai/keys</Text>
             </Pressable>
           </View>
 
@@ -183,7 +183,7 @@ export default function SettingsScreen() {
               <Text style={styles.modelStatus}>Active</Text>
             </View>
             <Text style={styles.cardDesc}>
-              Kimi K2 ek powerful model hai jo behtareen HTML/CSS generate karta hai.
+              Kimi K2 is a powerful model that generates beautiful, production-ready HTML/CSS pages.
             </Text>
           </View>
         </Animated.View>

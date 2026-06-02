@@ -133,7 +133,7 @@ export default function AIScreen() {
         ...prev,
         {
           id: (Date.now() + 1).toString(), role: "assistant",
-          text: "⚙️ Settings tab mein jaake pehle apni OpenRouter API key save karo, phir AI generate hoga.",
+          text: "⚙️ No API key found. Go to the Settings tab and add your OpenRouter API key to start generating HTML.",
           timestamp: new Date(),
         },
       ]);
@@ -196,7 +196,7 @@ export default function AIScreen() {
         {
           id: assistId, role: "assistant",
           text: isCredits
-            ? "❌ API key mein credits nahi hain. openrouter.ai/settings/credits par jaake credits add karo."
+            ? "❌ Insufficient credits on your API key. Visit openrouter.ai/settings/credits to add credits."
             : `❌ Error: ${msg}`,
           timestamp: new Date(),
         },
